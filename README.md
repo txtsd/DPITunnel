@@ -114,6 +114,22 @@ iptables -t nat -A PREROUTING -i <iface> -p tcp --dport 80 -j REDIRECT --to-port
 iptables -t nat -A PREROUTING -i <iface> -p tcp --dport 443 -j REDIRECT --to-port <proxy_port>
 ```
 
+## Docker
+
+You could run dpitunnel as docker container
+
+1. Build image:
+```bash
+docker build -t dpitunnel .
+```
+
+2. Start proxy
+```bash
+docker run -it -p 8080:8080 dpitunnel -doh -doh-server https://dns.google/dns-query -ttl 1 -ca-bundle-path /etc/ssl/certs/ca-certificates.crt -desync-attacks disorder_fake
+```
+
+Image is based on alpine, that provides ca certs bundle on path `/etc/ssl/certs/ca-certificates.crt`. You can use it in `ca-bundle-path` option.
+
 ## Links
 
 * [Telegram chat](https://t.me/DPITunnelOFFICIAL)
