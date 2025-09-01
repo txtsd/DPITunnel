@@ -7,6 +7,8 @@
 
 bool wildcard_match(char const *needle, char const *haystack);
 
+bool wildcard_match_iterative(const std::string &pattern, const std::string &str);
+
 bool check_host_name(const char *pattern, size_t pattern_len, std::string host);
 
 std::string last_n_chars(const std::string &input, unsigned int n);

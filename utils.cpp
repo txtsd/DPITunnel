@@ -41,6 +41,32 @@ bool wildcard_match(char const *needle, char const *haystack) {
     return *haystack == '\0';
 }
 
+bool wildcard_match_iterative(const std::string &pattern, const std::string &str) {
+    size_t p = 0, s = 0;
+    size_t star = std::string::npos, ss = 0;
+
+    while (s < str.size()) {
+        if (p < pattern.size() && (pattern[p] == str[s] || pattern[p] == '?')) {
+            p++;
+            s++;
+        } else if (p < pattern.size() && pattern[p] == '*') {
+            star = p++;
+            ss = s;
+        } else if (star != std::string::npos) {
+            p = star + 1;
+            s = ++ss;
+        } else {
+            return false;
+        }
+    }
+
+    while (p < pattern.size() && pattern[p] == '*') {
+        p++;
+    }
+
+    return p == pattern.size();
+}
+
 bool is_space_or_tab(char c) { return c == ' ' || c == '\t'; }
 
 std::pair<size_t, size_t> trim(const char *b, const char *e, size_t left,
@@ -252,11 +278,33 @@ int tcp_get_auto_ttl(const uint8_t ttl, const uint8_t autottl1,
 }
 
 bool match_whitelist_domain(const std::string &domain) {
-    return Settings_perst.whitelist_domains.find(domain) != Settings_perst.whitelist_domains.end();
+    if (Settings_perst.whitelist_domains.find(domain) != Settings_perst.whitelist_domains.end()) {
+        return true;
+    }
+
+    for (const auto &pattern : Settings_perst.whitelist_domains) {
+        if ((pattern.find('*') != std::string::npos || pattern.find('?') != std::string::npos) &&
+            wildcard_match_iterative(pattern, domain)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool match_whitelist_ip(const std::string &ip) {
-    return Settings_perst.whitelist_ips.find(ip) != Settings_perst.whitelist_ips.end();
+    if (Settings_perst.whitelist_ips.find(ip) != Settings_perst.whitelist_ips.end()) {
+        return true;
+    }
+
+    for (const auto &pattern : Settings_perst.whitelist_ips) {
+        if ((pattern.find('*') != std::string::npos || pattern.find('?') != std::string::npos) &&
+            wildcard_match_iterative(pattern, ip)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int load_whitelist() {
