@@ -38,7 +38,7 @@ jobs:
 
       - name: Upload Binary
         if: github.event_name != 'release'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dpitunnel-${{ matrix.arch }}
           path: build/dpitunnel
